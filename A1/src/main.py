@@ -31,13 +31,17 @@ def main():
     # print(f'data_final {data_final.shape} , data_final.columns: {data_final.columns}')
 
     train_df = read_data(train_path)
-    H,W,N,input_tensor  = make_input_data(train_df)
+    train_small = train_df[:10000].copy()
+    train_small.to_csv('train_small.csv')
 
-    # Instantiate the model
-    model = CNNModel(N,H,W,6)
-    # # Pass the input tensor through the model
-    output = model(input_tensor)
-    # print('output:',output)
+
+    # H,W,N,input_tensor  = make_input_data(train_df)
+
+    # # Instantiate the model
+    # model = CNNModel(N,H,W,6)
+    # # # Pass the input tensor through the model
+    # output = model(input_tensor)
+    # # print('output:',output)
 
 
 
