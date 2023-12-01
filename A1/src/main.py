@@ -4,6 +4,7 @@ import pandas as pd
 from collections import Counter
 import tensorflow as tf
 from utils.activity_type import ActivityType
+from data.dataset_split import X_Y_Split
 
 def main():
 
@@ -17,6 +18,18 @@ def main():
     #Test Data Shape: (2845600, 15)
     print(f"Train Data Shape: {(train_data.shape)}")
     print(f"Test Data Shape: {(test_data.shape)}")
+    # print(X_test.shape, y_test.shape, np.mean(X_test), np.std(X_test))
+    print("Train Data:",train_data.columns)
+    splitter = X_Y_Split(target_column='activity')
+
+    # Split the combined train data
+    X_train, y_train = splitter(train_data)
+    # Split the combined test data
+    X_test, y_test = splitter(test_data)
+    print("X_train:",X_train.shape)
+    print("y_train:",y_train.shape)
+    print("X_test:",X_test.shape)
+    print("y_test:",y_test.shape)
 
 
 

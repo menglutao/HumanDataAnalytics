@@ -2,43 +2,31 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 
-class TrainTestSplit:
+class X_Y_Split:
     """
-    Class for splitting data into train, test, and validation sets.
+    Class for splitting data into X and y.
     """
 
-    def __init__(self, subject_split_ratio=0.7, validation_size=0.25, random_state=42):
+    def __init__(self, target_column='activity'):
         """
-        Initializes the TrainTestSplit.
+        Initializes the X_Y_Split.
 
         Args:
-            subject_split_ratio (float): Proportion of subjects to include in the training split.
-            validation_size (float): Proportion of training data to include in the validation split.
-            random_state (int): Random state for reproducibility.
+            target_column (str): Name of the target column.
         """
-        self.subject_split_ratio = subject_split_ratio
-        self.validation_size = validation_size
-        self.random_state = random_state
+        self.target_column = target_column
 
-    def __call__(self, combined_data):
+    def __call__(self, data):
         """
-        Splits the data into train, validation, and test sets based on subjects.
+        Splits the data into X and y.
 
         Args:
-            combined_data (pd.DataFrame): DataFrame with data to split.
+            data (pd.DataFrame): DataFrame with data to split.
 
         Returns:
-            tuple: Three DataFrames representing train, validation, and test sets.
+            tuple: Two DataFrames representing X and y.
         """
-        # Split subjects into training and testing groups
-        subjects = combined_data['subject'].unique()
-        train_subjects, test_subjects = train_test_split(subjects, test_size=(1 - self.subject_split_ratio), random_state=self.random_state, shuffle=True)
+        X = data.drop(columns=[self.target_column])
+        y = data[self.target_column]
+        return X, y
 
-        # Split data based on subjects
-        train_data = combined_data[combined_data['subject'].isin(train_subjects)]
-        test_data = combined_data[combined_data['subject'].isin(test_subjects)]
-
-        # Further split training data into training and validation
-        train, valid = train_test_split(train_data, test_size=self.validation_size, random_state=self.random_state, shuffle=True)
-
-        return train, valid, test_data
