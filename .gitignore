@@ -3,5 +3,7 @@ A1/data
 .DS_Store
 A1/ref
 A1/output
+A1/dataset
+A1/dataset.zip
 *pyc
 *csv
