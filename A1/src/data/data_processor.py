@@ -37,32 +37,29 @@ class VectorMagnitude:
 
 class Standardize:
     """
-    Class for standardizing columns in a DataFrame.
+    Class for standardizing columns in a DataFrame or numpy array.
     """
 
-    def __init__(self, columns):
+    def __init__(self):
         """
-        Initializes the Standardize class with specified columns.
-
-        Args:
-            columns (list): List of column names to standardize.
+        Initializes the Standardize class.
         """
-        self.columns = columns
         self.scaler = StandardScaler()
 
-    def __call__(self, df):
+    def __call__(self, data):
         """
-        Standardizes the specified columns in the DataFrame.
+        Standardizes the specified columns in the DataFrame or numpy array.
 
         Args:
-            df (pd.DataFrame): DataFrame with data to standardize.
+            data (pd.DataFrame or np.ndarray): DataFrame or numpy array with data to standardize.
 
         Returns:
-            pd.DataFrame: DataFrame with standardized columns.
+            pd.DataFrame or np.ndarray: DataFrame or numpy array with standardized columns.
         """
-        df_standardized = df.copy()
-        df_standardized[self.columns] = self.scaler.fit_transform(df_standardized[self.columns])
-        return df_standardized
+        if isinstance(data, np.ndarray):
+            return self.scaler.fit_transform(data)
+        else:
+            raise TypeError("Input data must be a pandas DataFrame or numpy ndarray.")
 
 class ButterLowPassFilter:
     """

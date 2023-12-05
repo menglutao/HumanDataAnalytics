@@ -1,15 +1,16 @@
 import os
 import pandas as pd
+import numpy as np
 import subprocess
 from math import floor
 from sklearn.model_selection import train_test_split
 
 class DataLoader:
     def __init__(self, folder_path, subject_split_ratio=0.7, random_state=42):
-        self.train_dfs = []
-        self.test_dfs = []
+        self.train_data = None
+        self.test_data = None
         self.folder_path = folder_path
-        self.subject_split_ratio = subject_split_ratio
+        self.subject_split_ratio = subject_split_ratio 
         self.random_state = random_state
 
     def download_data(self):
@@ -26,29 +27,26 @@ class DataLoader:
         if self.folder_path is None:
             print("Error: Folder path is not set. Please run download_data first.")
             return
-        print(self.folder_path)
-        print(os.getcwd())
-        subjects = os.listdir(self.folder_path)
-        num_train_subjects = floor(len(subjects) * self.subject_split_ratio)
-        train_subjects, test_subjects = train_test_split(subjects, train_size=num_train_subjects, random_state=self.random_state, shuffle=True)
 
-        for subject in subjects:
+        subjects = os.listdir(self.folder_path)
+        num_train_subjects = floor(len(subjects) * self.subject_split_ratio)  # 70% of subjects for training 32 * 0.7 = 22
+        train_subjects, test_subjects = train_test_split(subjects, train_size=num_train_subjects, random_state=self.random_state, shuffle=True)
+        train_arrays = []
+        test_arrays = []
+        for subject in subjects:    
             file_path = os.path.join(self.folder_path, subject)
             try:
                 df = pd.read_csv(file_path)
-                df.insert(0, "subject", subject)
-
-                if subject in train_subjects:
-                    self.train_dfs.append(df)
+                array = df.to_numpy() # convert df to numpy array
+                if subject in train_subjects: 
+                    train_arrays.append(array) # append to train data list
                 else:
-                    self.test_dfs.append(df)
+                    test_arrays.append(array)
             except Exception as e:
                 print(f"Error processing file '{file_path}': {str(e)}")
-
-    def get_combined_data(self):
-        combined_train_data = pd.concat(self.train_dfs, ignore_index=True) if self.train_dfs else pd.DataFrame()
-        combined_test_data = pd.concat(self.test_dfs, ignore_index=True) if self.test_dfs else pd.DataFrame()
-        return combined_train_data, combined_test_data
+        self.train_data = np.concatenate(train_arrays) if train_arrays else None
+        self.test_data = np.concatenate(test_arrays) if test_arrays else None
+    
 
 
 
