@@ -36,8 +36,13 @@ class DataLoader:
         for subject in subjects:    
             file_path = os.path.join(self.folder_path, subject)
             try:
-                df = pd.read_csv(file_path)
+
+                df = pd.read_csv(file_path) 
+                # remove the rows with activity label 99 or 77 or 4
+                df = df[(df['activity'] != 99) & (df['activity'] != 77) & (df['activity'] != 4)]
+                # print("剩下的活动类型有：",df['activity'].unique())
                 array = df.to_numpy() # convert df to numpy array
+                
                 if subject in train_subjects: 
                     train_arrays.append(array) # append to train data list
                 else:
