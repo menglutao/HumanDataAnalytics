@@ -6,7 +6,7 @@ from math import floor
 from sklearn.model_selection import train_test_split
 
 class DataLoader:
-    def __init__(self, folder_path, subject_split_ratio=0.7, random_state=42):
+    def __init__(self, folder_path, subject_split_ratio=0.8, random_state=42):
         self.train_data = None
         self.test_data = None
         self.folder_path = folder_path
@@ -29,7 +29,7 @@ class DataLoader:
             return
 
         subjects = os.listdir(self.folder_path)
-        num_train_subjects = floor(len(subjects) * self.subject_split_ratio)  # 70% of subjects for training 32 * 0.7 = 22
+        num_train_subjects = floor(len(subjects) * self.subject_split_ratio)  # 25
         train_subjects, test_subjects = train_test_split(subjects, train_size=num_train_subjects, random_state=self.random_state, shuffle=True)
         train_arrays = []
         test_arrays = []
