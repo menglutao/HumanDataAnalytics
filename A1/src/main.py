@@ -9,9 +9,9 @@ from utils.activity_type import ActivityType
 import numpy as np
 import random as rn
 tf.compat.v1.disable_eager_execution()
-np.random.seed(18)
-rn.seed(971010)
-tf.random.set_seed(971010)
+np.random.seed(42)
+rn.seed(12345)
+tf.random.set_seed(1234)
 
 def main():
 
