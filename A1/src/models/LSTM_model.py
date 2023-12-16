@@ -5,9 +5,6 @@ class Config(object):
     """
     define a class to store parameters,
     the input should be feature mat of training and testing
-
-    Note: it would be more interesting to use a HyperOpt search space:
-    https://github.com/hyperopt/hyperopt
     """
 
     def __init__(self, X_train, X_test):
@@ -66,7 +63,7 @@ def LSTM_Network(_X, config):
     _X = tf.reshape(_X, [-1, config.n_inputs])
     # new shape: (n_steps*batch_size, n_input)
 
-    # Linear activation
+    # Non-Linear activation
     _X = tf.nn.relu(tf.matmul(_X, config.W['hidden']) + config.biases['hidden'])
     # Split data because rnn cell needs a list of inputs for the RNN inner loop
     _X = tf.split(_X, config.n_steps, 0)
@@ -76,6 +73,7 @@ def LSTM_Network(_X, config):
     lstm_cell_1 = tf.compat.v1.nn.rnn_cell.BasicLSTMCell(config.n_hidden, forget_bias=1.0, state_is_tuple=True)
     lstm_cell_2 = tf.compat.v1.nn.rnn_cell.BasicLSTMCell(config.n_hidden, forget_bias=1.0, state_is_tuple=True)
     lstm_cells = tf.compat.v1.nn.rnn_cell.MultiRNNCell([lstm_cell_1, lstm_cell_2], state_is_tuple=True)
+    
     # Get LSTM cell output
     outputs, states = tf.compat.v1.nn.static_rnn(lstm_cells, _X, dtype=tf.float32)
 

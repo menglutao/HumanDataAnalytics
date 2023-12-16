@@ -25,8 +25,11 @@ def main():
     data_loader = DataLoader("dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/raw_accelerometry_data")
     data_loader.download_data()
     data_loader.read_files()
-  
+   
     data_seg = DataSegmentation(window_duration=2.56, overlap=0.5, sampling_rate=50)
+    # data_seg = DataSegmentation(window_duration=1.28, overlap=0.5, sampling_rate=100)
+
+
     train_data_X,train_data_y = data_seg(data_loader.train_data)
     test_data_X,test_data_y = data_seg(data_loader.test_data)
 
