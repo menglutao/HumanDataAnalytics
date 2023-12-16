@@ -4,6 +4,8 @@ import numpy as np
 import subprocess
 from math import floor
 from sklearn.model_selection import train_test_split
+from data.data_processor import VectorMagnitude
+
 
 class DataLoader:
     def __init__(self, folder_path, subject_split_ratio=0.8, random_state=42):
@@ -33,11 +35,19 @@ class DataLoader:
         train_subjects, test_subjects = train_test_split(subjects, train_size=num_train_subjects, random_state=self.random_state, shuffle=True)
         train_arrays = []
         test_arrays = []
+        columns = ['lw', 'lh', 'ra', 'la']
+        VM = VectorMagnitude(columns)
+       
+        # print("vm:",VM.columns)
         for subject in subjects:    
             file_path = os.path.join(self.folder_path, subject)
             try:
 
                 df = pd.read_csv(file_path) 
+                # add 3 columns for magnitudes 
+                df_transformed = VM(df)
+                # print("df_transformed:",df_transformed.columns)
+                df = df_transformed.copy()
                 # remove the rows with activity label 99 or 77 or 4
                 df = df[(df['activity'] != 99) & (df['activity'] != 77) & (df['activity'] != 4)]
                 # print("剩下的活动类型有：",df['activity'].unique())

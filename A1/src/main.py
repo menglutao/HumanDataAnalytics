@@ -32,10 +32,14 @@ def main():
     train_data_X,train_data_y = data_seg(data_loader.train_data)
     test_data_X,test_data_y = data_seg(data_loader.test_data)
 
+    print("train_data_X.shape:",train_data_X.shape)
+
     label_mapping = ActivityType.create_label_mapping()
     print("label_mapping:",label_mapping)
+
     one_hot_encoded_train_y = ActivityType.one_hot(train_data_y, label_mapping)
     one_hot_encoded_test_y = ActivityType.one_hot(test_data_y, label_mapping)
+
     final_train_y = one_hot_encoded_train_y.reshape(one_hot_encoded_train_y.shape[0],-1)
     final_test_y = one_hot_encoded_test_y.reshape(one_hot_encoded_test_y.shape[0],-1)
 

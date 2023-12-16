@@ -14,7 +14,7 @@ class VectorMagnitude:
         Initializes the VectorMagnitude with specified columns.
 
         Args:
-            columns (list): List of column prefixes to calculate magnitude for.
+            columns (list): List of columns to calculate magnitude for.
         """
         self.columns = columns
 
