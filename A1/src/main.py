@@ -6,8 +6,10 @@ import tensorflow as tf
 from utils.activity_type import ActivityType
 from utils.build import Build
 from utils.train import Train
+from utils.performance import Performance
 import numpy as np
 import random as rn
+
 tf.compat.v1.disable_eager_execution()
 np.random.seed(42)
 rn.seed(12345)
@@ -46,7 +48,11 @@ def main():
     builder = Build(train_data_X,test_data_X,final_train_y,final_test_y)
     X, Y, accuracy, cost, optimizer, config, pred_Y = builder.build()
     trainer = Train(config,optimizer,pred_Y,cost,accuracy,test_data_X,final_test_y,train_data_X,final_train_y,X,Y)
-    trainer.train()
+    train_losses, train_accuracies, test_losses, test_accuracies = trainer.train()
+    print("test_accuracy:",test_accuracies)
+    performance = Performance(config)
+    performance.plot_performance(train_losses, train_accuracies, test_losses, test_accuracies)
+
   
 if __name__ == "__main__":
     main()

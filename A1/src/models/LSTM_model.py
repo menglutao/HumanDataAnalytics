@@ -16,7 +16,7 @@ class Config(object):
         # Training
         self.learning_rate = 0.0025
         self.lambda_loss_amount = 0.0015
-        self.training_epochs = 300
+        self.training_epochs = 20 #200
         self.batch_size = 1500
 
         # LSTM structure
