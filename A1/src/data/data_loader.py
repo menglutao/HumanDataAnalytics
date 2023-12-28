@@ -45,9 +45,9 @@ class DataLoader:
 
                 df = pd.read_csv(file_path) 
                 # add 3 columns for magnitudes 
-                df_transformed = VM(df)
+                # df_transformed = VM(df)
                 # print("df_transformed:",df_transformed.columns)
-                df = df_transformed.copy()
+                # df = df_transformed.copy()
                 # remove the rows with activity label 99 or 77 or 4
                 df = df[(df['activity'] != 99) & (df['activity'] != 77) & (df['activity'] != 4)]
                 # print("剩下的活动类型有：",df['activity'].unique())

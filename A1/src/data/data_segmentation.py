@@ -38,6 +38,9 @@ class DataSegmentation:
         label_segments = []
         start_index = 0
         standardizer = Standardize()
+        max_len = len(data)
+        print("all data:",max_len)
+        
         while start_index + window_size_samples <= len(data):
             data_segment = data[start_index:start_index + window_size_samples]
             label_segments.append(data_segment[0, 0]) # first column is label
