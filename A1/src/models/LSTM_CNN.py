@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 import pandas as pd
 import numpy as np
 
-def LSTM_CNN(y,window_size = 128, num_features = 12,learning_rate=0.001):
+def LSTM_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
     model = Sequential([
         Conv1D(filters=64, kernel_size=3, activation='relu',input_shape=(window_size, num_features)),  
         MaxPooling1D(pool_size=2),
