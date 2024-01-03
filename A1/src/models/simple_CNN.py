@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 import pandas as pd
 import numpy as np
 
-def simple_CNN(y,window_size = 128, num_features = 12,learning_rate=0.001):
+def simple_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
     model = Sequential([
 
         # First Convolutional Layer

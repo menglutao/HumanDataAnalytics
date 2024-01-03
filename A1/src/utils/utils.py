@@ -1,4 +1,4 @@
-from models.Dual_LSTM import Dual_LSTM, Config
+from models.Dual_LSTM import Dual_LSTM
 from models.LSTM_CNN import LSTM_CNN
 from models.DeepConvLSTM import deep_conv_lstm_model
 from models.DeepConvLSTM2 import deep_conv_lstm_model_2
@@ -65,61 +65,53 @@ def preprocess_data(person_df_map, window_size=128, step_size=64):
     return np.array(X), np.array(y)
 
 
-def select_model(model_name,train_data_y,config):
+def select_model(model_name):
     if model_name == "LSTM_CNN":
         print("Now it LSTM_CNN training!!!!")
-        return LSTM_CNN(train_data_y)
+        return LSTM_CNN()
     elif model_name == "Dual_LSTM":
         print("Now it Dual LSTM: stacked LSTM: training!!!!")
-        return Dual_LSTM(train_data_y,config)
-    elif model_name == "DeepConvLSTM":
-        print("Now it DeepConvLSTM training!!!!")
-        return deep_conv_lstm_model(train_data_y)
-    elif model_name == "DeepConvLSTM2":
-        print("Now it DeepConvLSTM2 training!!!!")
-        return deep_conv_lstm_model_2(train_data_y)
+        return Dual_LSTM()
     elif model_name == "DeepConvLSTM3":
         print("Now it DeepConvLSTM3 training!!!!")
-        return deep_conv_lstm_model_3(train_data_y)
-    elif model_name == "DeepConvLSTM4":
-        print("Now it DeepConvLSTM4 training!!!!")
-        return deep_conv_lstm_model_4(train_data_y)
+        return deep_conv_lstm_model_3()
     elif model_name == "simple_CNN":
         print("Now it simple_CNN training!!!!")
-        return simple_CNN(train_data_y)
+        return simple_CNN()
     else:
         raise ValueError("Unknown model name")
 
-def train_model(model_name,train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped):
-    config = Config(train_data_X,test_data_X)
-    model = select_model(model_name,train_data_y_1d_mapped,config=config)
+def train_model(model_name,X_train,y_train,X_test,y_test):
 
-    # early_stopping = EarlyStopping(monitor='val_loss', patience=5)
-    history = model.fit(train_data_X, train_data_y_1d_mapped, batch_size = 32,epochs=10, validation_split=0.2)
+    model = select_model(model_name)
+    print("aaaaa")
+    print(X_train.shape)
+    print(y_train.shape)
+    # y_train = y_train[:, 0]  # Assuming the label is the same for all time steps in a sample
+    history = model.fit(X_train, y_train, batch_size = 32,epochs=10, validation_split=0.2)
     # model = load_model('models/activity_recognition_model.h5') # might use later for showing the running code
     
-    y_prediction = model.predict(test_data_X)
+    y_prediction = model.predict(X_test)
     y_prediction = np.argmax(y_prediction, axis = 1)
-    y_test= test_data_y_1d_mapped
-    
+
     result = confusion_matrix(y_test, y_prediction , normalize='pred')
     labels = ["WALKING", "DESCENDING", "ASCENDING"]
     cm = confusion_matrix(y_test, y_prediction)
 
-    plot(history,cm,labels)
+    plot(history,cm,labels,model_names=model_name)
 
 
     precision = precision_score(y_test, y_prediction, average='weighted')
     recall = recall_score(y_test, y_prediction, average='weighted')
     f1 = f1_score(y_test, y_prediction, average='weighted')
 
-    evaluation_results = model.evaluate(test_data_X, test_data_y_1d_mapped)
+    evaluation_results = model.evaluate(X_test, y_test)
     loss, accuracy = evaluation_results
-    # Print the accuracy
-    print(f"Accuracy: {accuracy * 100:.2f}%")
     return loss,accuracy,precision,recall,f1
 
-def plot(history,cm,labels):
+def plot(history,cm,labels,model_names):
+    # set the size of the figure and the font size
+
     # plot the model accuracy
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -127,10 +119,14 @@ def plot(history,cm,labels):
     plt.title('Model Accuracy')
     plt.ylabel('Accuracy')
     plt.xlabel('Epoch')
-    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.legend(['Train', 'Validation','Loss'], loc='upper left')
+
+    plt.savefig(f"{model_names}_accuracy_loss.png")
     plt.show()
 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
     disp.plot(cmap=plt.cm.Blues)
+    plt.title(f"{model_names} Confusion Matrix")
+    plt.savefig(f"{model_names}_confusion_matrix.png")
     plt.show()
 
