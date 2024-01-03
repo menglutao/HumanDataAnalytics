@@ -17,7 +17,6 @@ class DataLoader:
         self.random_state = random_state
 
     def download_data(self):
-        
         if os.path.exists(self.folder_path):
             print(f"Dataset folder '{self.folder_path}' already exists. Skipping download.")
         else:
@@ -26,9 +25,7 @@ class DataLoader:
             subprocess.run(download_command, shell=True, check=True)
             subprocess.run(unzip_command, shell=True, check=True)
             print("`Download and extraction of dataset complete!")
-    
-    
-
+            
     def read_files(self):
         if self.folder_path is None:
             print("Error: Folder path is not set. Please run download_data first.")
