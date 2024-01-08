@@ -3,7 +3,6 @@ from models.LSTM_CNN import LSTM_CNN
 from models.DeepConvLSTM import deep_conv_lstm_model
 from models.DeepConvLSTM2 import deep_conv_lstm_model_2
 from models.DeepConvLSTM3 import deep_conv_lstm_model_3
-from models.DeepConvLSTM4 import deep_conv_lstm_model_4
 from models.simple_CNN import simple_CNN
 from sklearn.metrics import ConfusionMatrixDisplay,confusion_matrix,f1_score,precision_score, recall_score
 import matplotlib.pyplot as plt
@@ -12,13 +11,6 @@ import pandas as pd
 from pathlib import Path
 import os
 from sklearn.preprocessing import StandardScaler
-
-WALKING = 1
-DESCENDING = 2
-ASCENDING = 3
-
-activities_list_to_consider = [WALKING, DESCENDING, ASCENDING]
-
 
 data_directory_path = 'dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/raw_accelerometry_data'
 participant_demog_path = 'dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/participant_demog.csv'
@@ -54,7 +46,12 @@ def preprocess_data(person_df_map, window_size=128, step_size=64):
 
     for person_id, data in person_df_map.items():
         for activity_id, activity_df in data['activities'].items():
+
             activity_df = activity_df[['lw_x', 'lw_y', 'lw_z', 'lh_x', 'lh_y', 'lh_z', 'la_x', 'la_y', 'la_z', 'ra_x', 'ra_y', 'ra_z']]
+
+            if activity_df.shape[0] == 0: # which means zero rows
+                print(f"Skipping person {person_id} activity {activity_id} due to empty dataframe")
+                continue
             activity_df = scaler.fit_transform(activity_df)
 
             for start in range(0, len(activity_df) - window_size, step_size):
@@ -84,18 +81,19 @@ def select_model(model_name):
 def train_model(model_name,X_train,y_train,X_test,y_test):
 
     model = select_model(model_name)
-    print("aaaaa")
+
+
     print(X_train.shape)
     print(y_train.shape)
     # y_train = y_train[:, 0]  # Assuming the label is the same for all time steps in a sample
-    history = model.fit(X_train, y_train, batch_size = 32,epochs=10, validation_split=0.2)
+    history = model.fit(X_train, y_train, batch_size = 32,epochs=5, validation_split=0.2)
     # model = load_model('models/activity_recognition_model.h5') # might use later for showing the running code
     
     y_prediction = model.predict(X_test)
     y_prediction = np.argmax(y_prediction, axis = 1)
 
     result = confusion_matrix(y_test, y_prediction , normalize='pred')
-    labels = ["WALKING", "DESCENDING", "ASCENDING"]
+    labels = ["WALKING", "DESCENDING", "ASCENDING","DRIVING"]
     cm = confusion_matrix(y_test, y_prediction)
 
     plot(history,cm,labels,model_names=model_name)
@@ -106,6 +104,9 @@ def train_model(model_name,X_train,y_train,X_test,y_test):
     f1 = f1_score(y_test, y_prediction, average='weighted')
 
     evaluation_results = model.evaluate(X_test, y_test)
+    #save trained model for later use
+    print("model_name",model_name)
+    model.save(f'{model_name}_model.h5')
     loss, accuracy = evaluation_results
     return loss,accuracy,precision,recall,f1
 
@@ -125,7 +126,10 @@ def plot(history,cm,labels,model_names):
     plt.show()
 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+    # set the font size of the plot
+    
     disp.plot(cmap=plt.cm.Blues)
+
     plt.title(f"{model_names} Confusion Matrix")
     plt.savefig(f"{model_names}_confusion_matrix.png")
     plt.show()

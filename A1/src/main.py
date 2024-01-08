@@ -1,32 +1,38 @@
-from data.data_segmentation import DataSegmentation
-from data.data_loader import DataLoader
-import pandas as pd
-from collections import Counter
-import tensorflow as tf
-from utils.activity_type import ActivityType
-import numpy as np
-import random as rn
+# Standard Library Imports
+import os
 import datetime
-import os
-from utils.utils import select_model,train_model,plot
-
-from keras.callbacks import EarlyStopping
-import logging
-# System and File Operations
-import os
+import random as rn
+import warnings
+from collections import Counter
 from pathlib import Path
+
+# Data Manipulation
+import pandas as pd
+import numpy as np
+
+# Machine Learning and Data Processing
+import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from utils.utils import load_person_df_map, preprocess_data
+from sklearn.preprocessing import LabelEncoder
+
+# TensorFlow and Keras
+from keras.callbacks import EarlyStopping
+
+# Local Application Imports
+from data.data_loader import DataLoader
+from data.data_segmentation import DataSegmentation
+from utils.activity_type import ActivityType
+from utils.utils import load_person_df_map, preprocess_data, select_model, train_model, plot
 
 # Visualization
 import matplotlib.pyplot as plt
 import seaborn as sns
-import datetime
+import logging
 
-import warnings
+
 warnings.filterwarnings('ignore')
 tf.compat.v1.enable_eager_execution()
+
 
 
 def reset_seeds():
@@ -72,7 +78,9 @@ def preprocess_method_2():
     WALKING = 1
     DESCENDING = 2
     ASCENDING = 3
-    activities_list_to_consider = [WALKING, DESCENDING, ASCENDING]
+    DRIVING = 4
+
+    activities_list_to_consider = [WALKING, DESCENDING, ASCENDING, DRIVING]
     person_df_map = load_person_df_map(activities_list_to_consider)
     X, y = preprocess_data(person_df_map)
 
@@ -107,38 +115,42 @@ def main():
 
 
     # Choose one of the two methods of preprocessing
-    method = 1
+    method = 2
     if method == 1:
         train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped = preprocess_method_1()
     else:
         X_train,y_train,X_test,y_test = preprocess_method_2()
 
 
-    models = ["LSTM_CNN", "Dual_LSTM", "DeepConvLSTM3","simple_CNN"]
+    models = ["simple_CNN","LSTM_CNN", "Dual_LSTM", "DeepConvLSTM3"]
+    logger.info(
+    "Training Log\n"
+    f"Date and Time: {datetime.datetime.now()}\n"
+    f"Running the training process {num_runs} times\n\n"
+    f"Seed for this run is: {42}, {12345}, {1234}\n"
+)
     for model_name in models:
-        with open(filename, "w") as file:
+        logger.info(
+        f"Training epoch: {epochs}, learning rate: {learning_rate}, "
+        f"batch_size = {batch_size}, model is: {model_name} with new way of segmenting data\n"
+    )
+        for i in range(num_runs):
+            tf.compat.v1.enable_eager_execution()
+            reset_seeds() 
+            # tf.compat.v1.disable_eager_execution()  # Or enable, depending on your requirement
+            # loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #first method
+            # loss,accuracy,precision,recall,f1= train_model(model_name,train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped)
+            loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #second method
+            print("loss,accuracy,precision,recall,f1",loss,accuracy,precision,recall,f1)
             logger.info(
-            "Training Log\n"
-            f"Date and Time: {datetime.datetime.now()}\n"
-            f"Running the training process {num_runs} times\n\n"
-            f"Seed for this run is: {42}, {12345}, {1234}\n\n"
-            f"Training epoch: {epochs}, learning rate: {learning_rate}, "
-            f"batch_size = {batch_size}, model is: {model_name} with new way of segmenting data\n"
+                f"Run {i+1}:\n"
+                f"Accuracy = {accuracy}\n"
+                f"Precision = {precision}\n"
+                f"Recall = {recall}\n"
+                f"F1 = {f1}\n"
+                f"Loss = {loss}"
             )
-            for i in range(num_runs):
-                tf.compat.v1.enable_eager_execution()
-                reset_seeds() 
-                # tf.compat.v1.disable_eager_execution()  # Or enable, depending on your requirement
-                # loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #first method
-                loss,accuracy,precision,recall,f1= train_model(model_name,train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped)
-                # loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #second method
-                logger.info(f"Run {i+1}: \n"
-                            f"Accuracy = {accuracy}\n"
-                            f"Precision = {precision}\n"
-                            f"Recall = {recall}\n"
-                            f"F1 = {f1}\n"
-                            f"Loss = {loss}\n")
-                tf.keras.backend.clear_session()
+            tf.keras.backend.clear_session()
 
 if __name__ == "__main__":
     main()
