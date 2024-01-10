@@ -6,6 +6,7 @@ from keras.optimizers import Adam
 import pandas as pd
 import numpy as np
 
+num_classes = 4
 def LSTM_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
     model = Sequential([
         Conv1D(filters=64, kernel_size=3, activation='relu',input_shape=(window_size, num_features)),  
@@ -14,7 +15,7 @@ def LSTM_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
         Dropout(0.3),  # Additional dropout layer
         Dense(100, activation='relu'),
         Dropout(0.3),
-        Dense(3, activation='softmax')
+        Dense(num_classes, activation='softmax')
     ])
 
     model.summary()

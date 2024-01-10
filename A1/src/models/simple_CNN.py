@@ -6,6 +6,7 @@ from keras.optimizers import Adam
 import pandas as pd
 import numpy as np
 
+num_classes = 4
 def simple_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
     model = Sequential([
 
@@ -28,7 +29,7 @@ def simple_CNN(window_size = 128, num_features = 12,learning_rate=0.001):
         Flatten(),
         Dense(128, activation='relu'),
         Dropout(0.5),
-        Dense(3, activation='softmax')
+        Dense(num_classes, activation='softmax')
     ])
 
     model.summary()

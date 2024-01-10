@@ -50,7 +50,7 @@ class DataLoader:
                 # print("df_transformed:",df_transformed.columns)
                 # df = df_transformed.copy()
                 # remove the rows with activity label 99 or 77 or 4
-                df = df[(df['activity'] != 99) & (df['activity'] != 77) & (df['activity'] != 4)]
+                df = df[(df['activity'] != 99) & (df['activity'] != 77)] #& (df['activity'] != 4)   加入判断开车，进行4种判断
                 # print("剩下的活动类型有：",df['activity'].unique())
                 array = df.to_numpy() # convert df to numpy array
                 
