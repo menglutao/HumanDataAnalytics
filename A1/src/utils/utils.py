@@ -11,7 +11,8 @@ import pandas as pd
 from pathlib import Path
 import os
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 data_directory_path = 'dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/raw_accelerometry_data'
 participant_demog_path = 'dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/participant_demog.csv'
 
@@ -61,6 +62,57 @@ def preprocess_data(person_df_map, window_size=128, step_size=64):
 
     return np.array(X), np.array(y)
 
+def preprocess_data_2(person_df_map, window_size=128, step_size=64):
+    scaler = StandardScaler()
+    X, y = [], []
+    window_size = 128
+    step_size = 64
+    random_seed = 42  # Set a seed for reproducibility
+
+    # Extract unique person_ids
+    all_person_ids = list(person_df_map.keys())
+
+    # Choose 20 random subjects for training
+    train_person_ids, test_person_ids = train_test_split(all_person_ids, test_size=0.375, random_state=random_seed)
+    
+    for person_id, data in person_df_map.items():
+        for activity_id, activity_df in data['activities'].items():
+            activity_df = activity_df[['lw_x', 'lw_y', 'lw_z', 'lh_x', 'lh_y', 'lh_z', 'la_x', 'la_y', 'la_z', 'ra_x', 'ra_y', 'ra_z']]
+
+            if activity_df.shape[0] == 0:
+                print(f"Skipping person {person_id} activity {activity_id} due to an empty dataframe")
+                continue
+
+            activity_df = scaler.fit_transform(activity_df)
+
+            for start in range(0, len(activity_df) - window_size, step_size):
+                end = start + window_size
+                X.append(activity_df[start:end])
+                y.append(activity_id)
+
+    # Split data into training and test sets based on selected subjects
+    X_train, X_test, y_train, y_test = [], [], [], []
+
+    for i in range(len(X)):
+        person_id = all_person_ids[i % len(all_person_ids)]  # Cyclically assign person_id to data points
+        if person_id in train_person_ids:
+            X_train.append(X[i])
+            y_train.append(y[i])
+        else:
+            X_test.append(X[i])
+            y_test.append(y[i])
+
+    # Convert lists to numpy arrays for compatibility with machine learning models
+    X_train, X_test, y_train, y_test = (
+        np.array(X_train),
+        np.array(X_test),
+        np.array(y_train),
+        np.array(y_test)
+    )
+    label_encoder = LabelEncoder()
+    y_train = label_encoder.fit_transform(y_train)
+    y_test = label_encoder.transform(y_test)
+    return X_train, y_train,X_test,y_test
 
 def select_model(model_name):
     if model_name == "LSTM_CNN":
