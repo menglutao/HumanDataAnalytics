@@ -8,3 +8,6 @@ A1/dataset.zip
 *.zip
 *pyc
 *csv
+*txt
+*png
+

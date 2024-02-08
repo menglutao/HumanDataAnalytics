@@ -85,18 +85,20 @@ A1/
   ├── src/
   │   ├── data/
   │   │   └── data_preprocessing.py
-  │   │
+  │   ├── logs/
   │   ├── models/
-  │   │   ├── model_training.py
-  │   │   └── load_predict_save.py
-  │   │   └── plot_anomaly.py
+  │   │   ├── DeepConvLSTM.py
+  │   │   └── DNN.py
+  │   │   └── LSTM.py
+  │   │   └── CNN.py
+  │   ├── trained_models/
+  │   ├── plots/
   │   ├── utils/
   │   └── main.py
   │
   ├── config/
   │
   ├── requirements.txt
-  ├── requirements.dev.txt
   ├── README.md
 
 ```
