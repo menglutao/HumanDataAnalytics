@@ -14,7 +14,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-
+from sklearn.utils import shuffle
 # TensorFlow and Keras
 from keras.callbacks import EarlyStopping
 
@@ -22,7 +22,7 @@ from keras.callbacks import EarlyStopping
 from data.data_loader import DataLoader
 from data.data_segmentation import DataSegmentation
 from utils.activity_type import ActivityType
-from utils.utils import load_person_df_map, preprocess_data, train_model
+from utils.utils import load_person_df_map, preprocess_data, preprocess_data_2, select_model, train_model, plot
 
 # Visualization
 import matplotlib.pyplot as plt
@@ -150,7 +150,18 @@ def preprocess_method_2():
     X_test = X_test.reshape((-1, window_size, num_features))
     return X_train, y_train,X_test,y_test
 
+def preprocess_method_3():
 
+    WALKING = 1
+    DESCENDING = 2
+    ASCENDING = 3
+    DRIVING = 4
+    activities_list_to_consider = [WALKING, DESCENDING, ASCENDING, DRIVING]
+    person_df_map = load_person_df_map(activities_list_to_consider)
+    X_train, y_train,X_test,y_test = preprocess_data_2(person_df_map)
+    X_train, y_train = shuffle(X_train, y_train, random_state=42)
+    X_test,y_test = shuffle(X_test, y_test, random_state = 42)
+    return X_train, y_train,X_test,y_test
 
 if __name__ == "__main__":
     main()
