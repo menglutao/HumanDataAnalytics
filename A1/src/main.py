@@ -22,7 +22,7 @@ from keras.callbacks import EarlyStopping
 from data.data_loader import DataLoader
 from data.data_segmentation import DataSegmentation
 from utils.activity_type import ActivityType
-from utils.utils import load_person_df_map, preprocess_data, select_model, train_model, plot
+from utils.utils import load_person_df_map, preprocess_data, train_model
 
 # Visualization
 import matplotlib.pyplot as plt
@@ -33,13 +33,67 @@ import logging
 warnings.filterwarnings('ignore')
 tf.compat.v1.enable_eager_execution()
 
-
-
 def reset_seeds():
    os.environ["PYTHONHASHSEED"] = "42"
    np.random.seed(42) 
    rn.seed(12345)
    tf.random.set_seed(1234)
+
+
+
+def main():
+    num_runs = 1
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"logs/position_training_log_{current_time}.txt"
+    logging.basicConfig(filename=filename, level=logging.INFO, format='%(asctime)s %(message)s')
+    logger = logging.getLogger()
+
+    # Choose one of the two methods of preprocessing
+    method = "GAC"   # Grouped Activity Concatenation GAC
+    if method == "DC": # Direct Concatenation
+        train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped = preprocess_method_1()
+    else:
+        X_train,y_train,X_test,y_test = preprocess_method_2()
+
+
+    # models = ["simple_CNN"]
+    # models = ["simple_dense_network"]
+    # models = ["LSTM"]
+   
+
+    # models = ["simple_dense_network","simple_CNN","LSTM"]
+    # models = ["deep_conv_lstm_model"]
+    models = ["simple_dense_network","simple_CNN","LSTM" ,"deep_conv_lstm_model"]
+
+
+    logger.info(
+    "Training Log\n"
+    f"Date and Time: {datetime.datetime.now()}\n"
+    f"Running the training process {num_runs} times\n\n"
+    f"Seed for this run is: {42}, {12345}, {1234}\n"
+    f"Preprocessing method: {method}\n"
+)
+    for model_name in models:
+        logger.info(
+            f"Training model: {model_name}\n"
+    )
+        for i in range(num_runs):
+            tf.compat.v1.enable_eager_execution()
+            reset_seeds() 
+            if method == "DC":
+                loss,accuracy,precision,recall,f1= train_model(model_name,train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped)#first method
+            else:
+                loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #second method
+            print("loss,accuracy,precision,recall,f1",loss,accuracy,precision,recall,f1)
+            logger.info(
+                f"Run {i+1}:\n"
+                f"Accuracy = {accuracy}\n"
+                f"Precision = {precision}\n"
+                f"Recall = {recall}\n"
+                f"F1 = {f1}\n"
+                f"Loss = {loss}"
+            )
+            tf.keras.backend.clear_session()
 
 
 def preprocess_method_1():
@@ -58,8 +112,8 @@ def preprocess_method_1():
     label_mapping = ActivityType.create_label_mapping()
     
 
-    # one_hot_encoded_train_y = ActivityType.one_hot(train_data_y, label_mapping)
-    # one_hot_encoded_test_y = ActivityType.one_hot(test_data_y, label_mapping)
+    one_hot_encoded_train_y = ActivityType.one_hot(train_data_y, label_mapping)
+    one_hot_encoded_test_y = ActivityType.one_hot(test_data_y, label_mapping)
 
     
     # final_train_y = one_hot_encoded_train_y.reshape(one_hot_encoded_train_y.shape[0],-1)
@@ -82,7 +136,7 @@ def preprocess_method_2():
 
     activities_list_to_consider = [WALKING, DESCENDING, ASCENDING, DRIVING]
     person_df_map = load_person_df_map(activities_list_to_consider)
-    X, y = preprocess_data(person_df_map)
+    X, y= preprocess_data(person_df_map)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     label_encoder = LabelEncoder()
@@ -97,60 +151,6 @@ def preprocess_method_2():
     return X_train, y_train,X_test,y_test
 
 
-
-def main():
-    LABELS = [
-        "Walking",
-        "Descending Stairs",
-        "Ascending Stairs"
-    ]
-    epochs = 10
-    batch_size = 32
-    learning_rate = 0.001
-    num_runs = 1
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = f"training_log_{current_time}.txt"
-    logging.basicConfig(filename=filename, level=logging.INFO, format='%(asctime)s %(message)s')
-    logger = logging.getLogger()
-
-
-    # Choose one of the two methods of preprocessing
-    method = 2
-    if method == 1:
-        train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped = preprocess_method_1()
-    else:
-        X_train,y_train,X_test,y_test = preprocess_method_2()
-
-
-    models = ["simple_CNN","LSTM_CNN", "Dual_LSTM", "DeepConvLSTM3"]
-    logger.info(
-    "Training Log\n"
-    f"Date and Time: {datetime.datetime.now()}\n"
-    f"Running the training process {num_runs} times\n\n"
-    f"Seed for this run is: {42}, {12345}, {1234}\n"
-)
-    for model_name in models:
-        logger.info(
-        f"Training epoch: {epochs}, learning rate: {learning_rate}, "
-        f"batch_size = {batch_size}, model is: {model_name} with new way of segmenting data\n"
-    )
-        for i in range(num_runs):
-            tf.compat.v1.enable_eager_execution()
-            reset_seeds() 
-            # tf.compat.v1.disable_eager_execution()  # Or enable, depending on your requirement
-            # loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #first method
-            # loss,accuracy,precision,recall,f1= train_model(model_name,train_data_X,train_data_y_1d_mapped,test_data_X,test_data_y_1d_mapped)
-            loss,accuracy,precision,recall,f1= train_model(model_name,X_train,y_train,X_test,y_test) #second method
-            print("loss,accuracy,precision,recall,f1",loss,accuracy,precision,recall,f1)
-            logger.info(
-                f"Run {i+1}:\n"
-                f"Accuracy = {accuracy}\n"
-                f"Precision = {precision}\n"
-                f"Recall = {recall}\n"
-                f"F1 = {f1}\n"
-                f"Loss = {loss}"
-            )
-            tf.keras.backend.clear_session()
 
 if __name__ == "__main__":
     main()

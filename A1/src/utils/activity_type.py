@@ -21,7 +21,7 @@ class ActivityType:
 
     def create_label_mapping():
         activity_ids = [ActivityType.WALKING, ActivityType.DESCENDING_STAIRS, 
-                        ActivityType.ASCENDING_STAIRS]
+                        ActivityType.ASCENDING_STAIRS, ActivityType.DRIVING,]
         label_mapping = {label: idx for idx, label in enumerate(activity_ids)}
         return label_mapping
 
