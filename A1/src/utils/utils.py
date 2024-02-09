@@ -16,16 +16,26 @@ data_directory_path = 'dataset/labeled-raw-accelerometry-data-captured-during-wa
 participant_demog_path = 'dataset/labeled-raw-accelerometry-data-captured-during-walking-stair-climbing-and-driving-1.0.0/participant_demog.csv'
 
 # global variables
-position_flag = True
+position_flag = False
 num_features = 3 if position_flag else 12 # if position_flag is true, then we will only consider the one position data which is 3 features
 
 def load_person_df_map(activities_list_to_consider):
         paths = Path(data_directory_path).glob("*.csv")
         df_participant_demog = pd.read_csv(participant_demog_path, index_col='subj_id')
         person_df_map = {}
+
         for i, person_data_file_path in enumerate(paths):
             person_id = os.path.splitext(os.path.basename(person_data_file_path))[0]
             df = pd.read_csv(person_data_file_path)
+            # df columns
+            # adding the guassian noise to the data flag
+            flag_nosie = True
+            mu, sigma = 0.1, 10000 # mean and standard deviation
+            if flag_nosie:
+                cols_to_noise = df.columns[2:]
+                df[cols_to_noise] = df[cols_to_noise] + np.random.normal(mu, sigma, df[cols_to_noise].shape)
+            else:
+                df = df
 
             # extracting DFs by activity ID
             activities = {}
@@ -159,8 +169,7 @@ def train_model(model_name,X_train,y_train,X_test,y_test):
     labels = ["WALKING", "DESCENDING", "ASCENDING","DRIVING"]
     cm = confusion_matrix(y_test, y_prediction)
 
-    # plot(history,cm,labels,model_names=model_name)
-
+    plot(history,cm,labels,model_names=model_name)
 
     precision = precision_score(y_test, y_prediction, average='weighted')
     recall = recall_score(y_test, y_prediction, average='weighted')
@@ -185,7 +194,7 @@ def plot(history,cm,labels,model_names):
     plt.legend(['Train', 'Validation','Loss'], loc='upper left')
 
     plt.savefig(f"{model_names}_accuracy_loss.png")
-    # plt.show()
+    plt.show()
 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
     # set the font size of the plot
@@ -193,5 +202,5 @@ def plot(history,cm,labels,model_names):
     disp.plot(cmap=plt.cm.Blues)
     plt.title(f"{model_names} Confusion Matrix")
     plt.savefig(f"plots/{model_names}_confusion_matrix.png")
-    # plt.show()
+    plt.show()
 

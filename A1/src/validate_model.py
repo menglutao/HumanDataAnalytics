@@ -3,7 +3,6 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from utils.utils import load_person_df_map
 
-
 model_name = 'simple_CNN'
 # Load the model
 model = load_model(f'{model_name}_model.h5')

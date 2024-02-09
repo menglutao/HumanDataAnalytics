@@ -22,7 +22,7 @@ from keras.callbacks import EarlyStopping
 from data.data_loader import DataLoader
 from data.data_segmentation import DataSegmentation
 from utils.activity_type import ActivityType
-from utils.utils import load_person_df_map, preprocess_data, preprocess_data_2, select_model, train_model, plot
+from utils.utils import load_person_df_map, preprocess_data, preprocess_data_2, train_model
 
 # Visualization
 import matplotlib.pyplot as plt
@@ -44,7 +44,7 @@ def reset_seeds():
 def main():
     num_runs = 1
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = f"logs/position_training_log_{current_time}.txt"
+    filename = f"logs/training_log_{current_time}.txt"
     logging.basicConfig(filename=filename, level=logging.INFO, format='%(asctime)s %(message)s')
     logger = logging.getLogger()
 
@@ -55,14 +55,6 @@ def main():
     else:
         X_train,y_train,X_test,y_test = preprocess_method_2()
 
-
-    # models = ["simple_CNN"]
-    # models = ["simple_dense_network"]
-    # models = ["LSTM"]
-   
-
-    # models = ["simple_dense_network","simple_CNN","LSTM"]
-    # models = ["deep_conv_lstm_model"]
     models = ["simple_dense_network","simple_CNN","LSTM" ,"deep_conv_lstm_model"]
 
 
@@ -110,15 +102,6 @@ def preprocess_method_1():
     test_data_X,test_data_y = data_seg(data_loader.test_data)
 
     label_mapping = ActivityType.create_label_mapping()
-    
-
-    one_hot_encoded_train_y = ActivityType.one_hot(train_data_y, label_mapping)
-    one_hot_encoded_test_y = ActivityType.one_hot(test_data_y, label_mapping)
-
-    
-    # final_train_y = one_hot_encoded_train_y.reshape(one_hot_encoded_train_y.shape[0],-1)
-    # final_test_y = one_hot_encoded_test_y.reshape(one_hot_encoded_test_y.shape[0],-1)
-
     
     train_data_y_1d = np.squeeze(train_data_y)
     test_data_y_1d = np.squeeze(test_data_y)
